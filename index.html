@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Punggawa Phishing Awareness Quiz</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --punggawa-green: #28a745;
+      --button-green: #28a745;
+      --button-green-hover: #218838;
+    }
+    body {
+      font-family: 'Montserrat', Arial, sans-serif;
+      text-align: center;
+      background: #fff;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: var(--punggawa-green);
+      padding: 15px;
+      text-align: center;
+    }
+    header img {
+      max-height: 60px;
+      filter: brightness(0) invert(1);
+    }
+    h1 {
+      font-weight: 700;
+      margin: 20px 0;
+      color: #333;
+    }
+    .card {
+      width: 90%;
+      max-width: 900px;
+      margin: 20px auto;
+      perspective: 1000px;
+    }
+    .card-inner {
+      position: relative;
+      width: 100%;
+      min-height: 520px;
+      transition: transform 0.8s, box-shadow 0.3s;
+      transform-style: preserve-3d;
+    }
+    .flipped .card-inner { transform: rotateY(180deg); }
+    .card-front, .card-back {
+      position: absolute;
+      width: 100%;
+      min-height: 520px;
+      backface-visibility: hidden;
+      border: 2px solid var(--punggawa-green);
+      border-radius: 12px;
+      padding: 25px;
+      background: #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      box-sizing: border-box;
+    }
+    .card-front h2 { font-size: 1.5rem; font-weight: 600; margin-bottom: 15px; color: #222; }
+    .card-back { transform: rotateY(180deg); }
+    #q-image { max-width: 100%; max-height: 650px; margin: 15px auto; display: block; border: 1px solid #ccc; border-radius: 6px; }
+    button {
+      margin: 15px 10px;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      background: var(--button-green);
+      color: white;
+      font-weight: 600;
+      font-size: 1rem;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      transition: background-color 0.2s, transform 0.2s;
+    }
+    button:hover { background: var(--button-green-hover); transform: translateY(-2px); }
+    .progress { width: 80%; margin: 15px auto; height: 12px; background: #eee; border-radius: 8px; }
+    #progress-bar { height: 12px; width: 0; background: var(--punggawa-green); border-radius: 8px; transition: width 0.3s; }
+    .difficulty-tag { padding: 4px 10px; border-radius: 6px; font-weight: 600; color: #fff; }
+    .difficulty-easy { background: #28a745; }
+    .difficulty-medium { background: #ff9800; }
+    .difficulty-hard { background: #dc3545; }
+    .recap { text-align: left; max-width: 800px; margin: 30px auto; padding: 25px; background: #fff; border: 2px solid var(--punggawa-green); border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
+    .recap ul li { margin-bottom: 12px; }
+    .promo-btn { display: inline-block; margin: 8px; padding: 12px 20px; border-radius: 25px; font-weight: 600; text-decoration: none; background: var(--punggawa-green); color: #fff; transition: background 0.2s, transform 0.2s; }
+    .promo-btn:hover { background: #218838; transform: translateY(-2px); }
+    footer { margin-top: 40px; padding: 15px; font-size: 0.9rem; color: #666; border-top: 2px solid var(--punggawa-green); background: #f9f9f9; }
+  </style>
+</head>
+<body>
+  <header>
+    <img src="images/logo.png" alt="Punggawa Logo">
+  </header>
+  <h1>Phishing Awareness Quiz</h1>
+  <div class="progress">
+    <div id="progress-bar"></div>
+  </div>
+  <div id="progress-text"></div>
+
+  <div id="quiz-card" class="card">
+    <div class="card-inner">
+      <div class="card-front">
+        <h2 id="q-subject"></h2>
+        <p><strong>Difficulty:</strong> <span id="q-difficulty" class="difficulty-tag"></span></p>
+        <p id="q-body"></p>
+        <img id="q-image" src="" alt="" style="display:none;">
+        <button onclick="choose('Legit')">Legit</button>
+        <button onclick="choose('Phishing')">Phishing</button>
+      </div>
+      <div class="card-back">
+        <h2>Answer</h2>
+        <p><strong>Correct Answer:</strong> <span id="q-answer"></span></p>
+        <p id="q-explanation"></p>
+        <button onclick="nextQuestion()">Next</button>
+      </div>
+    </div>
+  </div>
+
+  <h2 id="score"></h2>
+
+  <footer>
+    &copy; <span id="year"></span> PT.Punggawa SIBER SOLUSI. All rights reserved.
+  </footer>
+  <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+    const originalQuestions = [
+        {
+            'subject' : 'Sometimes legitimate domain is not enough',
+            'body' : 'You are in a mundane Wednesday morning stuck in a heated debate during your company weekly meeting, suddenly you got notification from your email. As a Model employee you immediately open and about to reply, then you stumbled upon this. It seems you got email from admin in the company you are currently work with',
+            'answer' : 'Phishing',
+            'explanation' : 'Suspicious admin email could be spoofed. Look at the fact that the email straight into Spam despite comes from legitimate domain',
+            'image' : 'images/scenario1.png',
+            'difficulty' : 'Hard'
+        },
+        {
+            'subject' : 'dont be fooled, you are always targeted',
+            'body' : 'You are an employee in the big state-owned corporation accused of being exploitative and misconduct against basic human rights. Lately your company has become a target from many social justice warrior groups. Suddenly the company asks you to get your monthly medical checkup. Here’s what you got…',
+            'answer' : 'Phishing',
+            'explanation' : 'Unusual request, potential malicious attachment or link. (look at the email domain)',
+            'image' : 'images/scenario2.png',
+            'difficulty' : 'Hard'
+        },
+        {
+            'subject' : 'in this economy, there is no such thing as free lunch',
+            'body' : 'You are a minimum wage worker living in the harsh living and working environment in Jakarta. When you are trying to make ends meet which is often really difficult, you stumbled upon an interesting present from Coca-Cola in your email. The presence is not much but at least you can try to make a healthy juice instead of your usual Indomie diet.',
+            'answer' : 'Phishing',
+            'explanation' : 'Too good to be true giveaway, likely data harvesting (using image only is known to be a TTP)',
+            'image' : 'images/scenario3.png',
+            'difficulty' : 'Hard'
+        },
+        {
+            'subject' : 'out of pocket and also get wrecked',
+            'body' : 'You work in the finance division in the best IT Solution and Service company in the entire South East Asia and parts of Africa plus Oceania. Your normal work also deals with invoices usually issued by your colleague. Since you are an extremely careful person you always work based on the deny be default principle when dealing with invoice. So how about this invoice? One of your colleagues told you that he is about to pay for a CISA Certification for around 599 USD. (Although in the end he failed miserably missing by tiny margin)',
+            'answer' : 'Phishing',
+            'explanation' : 'Fake invoice, malicious attachment risk.',
+            'image' : 'images/scenario4.png',
+            'difficulty' : 'Medium'
+        },
+        {
+            'subject' : 'big brain move detected',
+            'body' : 'You are a new recruit in Punggawa corp, as one of the leading Cybersecurity services in the Republic of Indonesia, you are keen to show them what skill you got. Suddenly an urgent email telling you that your password has been compromised. Since you are working for a cybersec company and do not want to tarnish their reputation, a compromised password will spell doom for your reputation so you want to sort it out as soon as possible. But is it really the case?',
+            'answer' : 'Phishing',
+            'explanation' : 'Urgency tactic. Real companies don’t send password reset this way.',
+            'image' : 'images/scenario5.png',
+            'difficulty' : 'Easy'
+        },
+        {
+            'subject' : 'Password-nya kakak..... ;v',
+            'body' : 'Your corporate email password will expire today. Click here to reset immediately: http://mail-secure-update.com',
+            'answer' : 'Phishing',
+            'explanation' : 'Fake domain trying to steal credentials.',
+            'image' : 'images/scenario6.png',
+            'difficulty' : 'Medium'
+        },
+        {
+            'subject' : 'gak kebagian hasil loot rumah dpr ahh moment...',
+            'body' : 'Dear Customer, Attached is the receipt for your recent purchase. Thank you for shopping with us. (Attachment: Invoice2025.zip)',
+            'answer' : 'Phishing',
+            'explanation' : 'Suspicious .zip attachment. Invoices usually are PDFs.',
+            'image' : 'images/scenario7.png',
+            'difficulty' : 'Easy'
+        },
+        {
+            'subject' : 'CEO Request but is this the real pak iwan???',
+            'body' : 'Hi, I’m in a meeting. Please wire $10,000 to the following account ASAP. Don’t call, just reply here once done.',
+            'answer' : 'Phishing',
+            'explanation' : 'Classic Business Email Compromise (BEC).',
+            'image' : 'images/scenario8.png',
+            'difficulty' : 'Easy'
+        },
+        {
+            'subject' : 'Oh no, im about to create the Fourth Reich',
+            'body' : 'Login detected from Germany. Secure account: https://account.microsoft.com/security',
+            'answer' : 'Legit',
+            'explanation' : 'Real Microsoft domain alert.',
+            'image' : 'images/scenario9.png',
+            'difficulty' : 'Medium'
+        },
+        {
+            'subject' : 'srimulyani.exe has not stopped working',
+            'body' : 'Provide your bank details to receive your refund.',
+            'answer' : 'Phishing',
+            'explanation' : 'Government never asks bank info via email.',
+            'image' : 'images/scenario10.png',
+            'difficulty' : 'Hard'
+        },
+        {
+            'subject' : 'Zoom Meeting Invitation',
+            'body' : 'Join Zoom Meeting: https://zoom.us/j/69694200 (From your manager’s correct company email address)',
+            'answer' : 'Legit',
+            'explanation' : 'Valid Zoom domain, correct sender.',
+            'image' : 'images/scenario11.png',
+            'difficulty' : 'Easy'
+        },
+        {
+            'subject' : 'Toko Ijo Order Confirmation',
+            'body' : 'Click here to cancel order: http://tok0pedia.com',
+            'answer' : 'Phishing',
+            'explanation' : 'Fake domain with zero instead of “o”.',
+            'image' : 'images/scenario12.png',
+            'difficulty' : 'Easy'
+        },
+        {
+            'subject' : 'Its a bird, a plane? no its Internal HR Benefits update',
+            'body' : 'Attached: Benefits_2025.pdf from HR’s domain.',
+            'answer' : 'Legit',
+            'explanation' : 'Internal, trusted sender with PDF.',
+            'image' : 'images/scenario13.png',
+            'difficulty' : 'Easy'
+        },
+        {
+            'subject' : 'Netflix Suspension',
+            'body' : 'Update payment at http://netflix-billing-update.net',
+            'answer' : 'Phishing',
+            'explanation' : 'Fake Netflix domain.',
+            'image' : 'images/scenario14.png',
+            'difficulty' : 'Medium'
+        },
+        {
+            'subject' : 'When your whole family but the office remember your birthday T_T',
+            'body' : 'Click internal.company.com/rewards/birthday to claim gift.',
+            'answer' : 'Legit',
+            'explanation' : 'Internal company domain, context matches.',
+            'image' : 'images/scenario15.png',
+            'difficulty' : 'Easy'
+        }
+    ];
+
+    // Shuffle helper
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    let questions = shuffle([...originalQuestions]);
+    let index = 0;
+    let score = 0;
+    let mistakes = [];
+
+    function loadQuestion(i) {
+      const q = questions[i];
+      document.getElementById('q-subject').textContent = q.subject;
+      document.getElementById('q-body').textContent = q.body;
+      document.getElementById('q-answer').textContent = q.answer;
+      document.getElementById('q-explanation').textContent = q.explanation;
+
+      const diffEl = document.getElementById('q-difficulty');
+      diffEl.textContent = q.difficulty;
+      diffEl.className = "difficulty-tag difficulty-" + q.difficulty.toLowerCase();
+
+      const img = document.getElementById('q-image');
+      if (q.image) { img.src = q.image; img.style.display = 'block'; }
+      else { img.style.display = 'none'; }
+
+      document.getElementById('quiz-card').classList.remove('flipped');
+      updateProgress();
+    }
+
+    function choose(choice) {
+      const correct = questions[index].answer;
+      if (choice === correct) { score++; }
+      else { mistakes.push({ question: questions[index], yourAnswer: choice }); }
+      document.getElementById('quiz-card').classList.add('flipped');
+      if (index === questions.length - 1) { updateProgress(true); }
+    }
+
+    function nextQuestion() {
+      index++;
+      if (index < questions.length) {
+        document.getElementById('quiz-card').classList.remove('flipped');
+        setTimeout(() => loadQuestion(index), 300);
+      } else {
+        document.getElementById('progress-bar').style.width = "100%";
+        document.getElementById('progress-text').textContent = questions.length + " / " + questions.length + " answered";
+        document.getElementById('quiz-card').style.display = 'none';
+        document.getElementById('score').textContent = "Final Score: " + score + " / " + questions.length;
+        showRecap();
+      }
+    }
+
+    function updateProgress(forceComplete = false) {
+      let answered = forceComplete ? questions.length : index;
+      let percent = (answered / questions.length) * 100;
+      document.getElementById('progress-bar').style.width = percent + "%";
+      document.getElementById('progress-text').textContent = answered + " / " + questions.length + " answered";
+    }
+
+    function showRecap() {
+      const recapDiv = document.createElement('div');
+      recapDiv.className = "recap";
+
+      let html = "<h2>Quiz Recap</h2>";
+      if (mistakes.length === 0) {
+        html += "<p>🎉 Excellent! You didn’t make any mistakes. Stay alert and keep practicing safe email habits.</p>";
+      } else {
+        html += "<p>You made mistakes on the following questions:</p><ul>";
+        mistakes.forEach(m => {
+          const q = m.question;
+          html += `<li><strong>${q.subject}</strong> <em>(${q.difficulty})</em><br>
+                     <pre style="white-space:pre-wrap; font-family:inherit; margin:8px 0;">${q.body}</pre>
+                     ${q.image ? `<img src="${q.image}" style="max-width:200px; margin:8px 0;">` : ""}<br>
+                     Your answer: <em>${m.yourAnswer}</em><br>
+                     Correct answer: <em>${q.answer}</em><br>
+                     Tip: ${q.explanation}</li><br>`;
+        });
+        html += "</ul><p>👉 To improve: Always double-check sender addresses, be cautious of urgency, avoid clicking unknown links, and verify attachments with IT.</p>";
+      }
+
+      html += `<div style="margin-top:20px;">
+                 <button onclick="restartQuiz()">Restart Quiz</button>`;
+      if (mistakes.length > 0) {
+        html += ` <button onclick="retryMistakes()">Retry Only Mistakes</button>`;
+      }
+      html += `</div>`;
+
+      html += `<div class="promo-buttons" style="margin-top:25px; text-align:center;">
+                 <a href="https://www.punggawa.com/services/" target="_blank" class="promo-btn">Explore Our Services</a>
+                 <a href="https://www.punggawa.com/contact-us/" target="_blank" class="promo-btn">Contact Us</a>
+               </div>`;
+
+      recapDiv.innerHTML = html;
+      document.body.appendChild(recapDiv);
+    }
+
+    function retryMistakes() {
+      index = 0;
+      score = 0;
+      questions = shuffle(mistakes.map(m => m.question));
+      mistakes = [];
+      document.getElementById('score').textContent = "";
+      document.querySelectorAll('.recap').forEach(el => el.remove());
+      document.getElementById('quiz-card').style.display = 'block';
+      loadQuestion(index);
+    }
+
+    function restartQuiz() { window.location.reload(); }
+
+    window.onload = () => loadQuestion(index);
+  </script>
+</body>
+</html>
